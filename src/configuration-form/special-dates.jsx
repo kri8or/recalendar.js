@@ -17,13 +17,17 @@ import { Trans, withTranslation } from 'react-i18next';
 
 import { fetchCountries, fetchHolidays } from '~/lib/holidays-api';
 import {
+  buildHolidayEntries,
   DATE_FORMAT,
   EVENT_DAY_TYPE,
   formatYearRange,
   getDedupeKey,
   getSpannedYears,
   HOLIDAY_DAY_TYPE,
+  isYearSpecificDate,
+  YEAR_DATE_FORMAT,
 } from '~/lib/special-dates-utils';
+import { getCalendarMonthCount, getCalendarStartDate } from '~/pdf/utils';
 
 const STATUS_EMPTY = 'EMPTY';
 const STATUS_LOADING = 'LOADING';
@@ -67,6 +71,24 @@ class SpecialDates extends React.PureComponent {
     this.setState({ deduplicate: event.target.checked });
   };
 
+  // Years the calendar really covers - the whole years-overview span when it
+  // is enabled, or the regular year/month/month-count span otherwise.
+  getSpannedCalendarYears() {
+    const { year, month, monthCount, isDecadeEnabled, decadeStartYear } = this.props;
+    const calendarStart = getCalendarStartDate({
+      year: Number(year),
+      month: Number(month),
+      isDecadeEnabled,
+      decadeStartYear,
+    });
+
+    return getSpannedYears({
+      year: calendarStart.year(),
+      month: calendarStart.month(),
+      monthCount: getCalendarMonthCount({ monthCount: Number(monthCount), isDecadeEnabled }),
+    });
+  }
+
   loadCountries = () => {
     const { countriesStatus } = this.state;
     if (countriesStatus === STATUS_LOADING || countriesStatus === STATUS_SUCCESS) {
@@ -88,15 +110,9 @@ class SpecialDates extends React.PureComponent {
   };
 
   onImportHolidays = async () => {
-    const { year, month, monthCount } = this.props;
     const { selectedCountry, nameLanguage, deduplicate, yearsCovered, countries } = this.state;
 
-    const spannedYears = getSpannedYears({
-      year: Number(year),
-      month: Number(month),
-      monthCount: Number(monthCount),
-    });
-    const targetYears = spannedYears.filter((y) => yearsCovered.includes(y));
+    const targetYears = this.getSpannedCalendarYears().filter((y) => yearsCovered.includes(y));
     if (targetYears.length === 0) {
       this.setState({ holidaysStatus: STATUS_YEAR_UNAVAILABLE });
       return;
@@ -105,12 +121,11 @@ class SpecialDates extends React.PureComponent {
     this.setState({ holidaysStatus: STATUS_LOADING });
     try {
       const holidayLists = await Promise.all(targetYears.map((y) => fetchHolidays(selectedCountry, y)));
+      const entries = buildHolidayEntries(holidayLists, targetYears);
       const seen = new Set(this.props.items.map(getDedupeKey));
       let added = 0;
       let skipped = 0;
-      holidayLists.flat().forEach((holiday) => {
-        const date = holiday.date.slice(5);
-        const holidayName = holiday.name;
+      entries.forEach(({ date, holidayName, holiday }) => {
         const value = nameLanguage === LOCAL_NAME ? holiday.local_name || holiday.name : holiday.name;
         const key = getDedupeKey({ date, holidayName });
         if (deduplicate && seen.has(key)) {
@@ -146,6 +161,8 @@ class SpecialDates extends React.PureComponent {
   };
 
   onFileLoad = (event) => {
+    const spannedYears = this.getSpannedCalendarYears();
+    const firstCalendarYear = spannedYears[0];
     try {
       const jcalData = ICAL.parse(event.target.result);
       const vcalendar = new ICAL.Component(jcalData);
@@ -157,17 +174,17 @@ class SpecialDates extends React.PureComponent {
         if (ev.isRecurring()) {
           const iter = ev.iterator();
           for (let next = iter.next(); next; next = iter.next()) {
-            if (next.year < this.props.year) {
+            if (next.year < firstCalendarYear) {
               continue;
-            } else if (next.year > this.props.year) {
+            } else if (next.year > firstCalendarYear) {
               break;
             }
             const date = dayjs(next.toJSDate());
             const key = date.format(DATE_FORMAT);
             this.props.onAdd({ date: key, value, type: this.state.icalType });
           }
-        } else if (startDate.year() === this.props.year) {
-          const key = startDate.format(DATE_FORMAT);
+        } else if (spannedYears.includes(startDate.year())) {
+          const key = startDate.format(YEAR_DATE_FORMAT);
           this.props.onAdd({ date: key, value, type: this.state.icalType });
         }
       });
@@ -208,11 +225,13 @@ class SpecialDates extends React.PureComponent {
     const ItemGroup = (key) => {
       const { t } = this.props;
       const items = groupedItems[key];
-      const date = dayjs(key, DATE_FORMAT);
+      const isYearSpecific = isYearSpecificDate(key);
+      const date = isYearSpecific ? dayjs(key, YEAR_DATE_FORMAT) : dayjs(key, DATE_FORMAT);
+      const dateLabel = isYearSpecific ? date.format('MMMM DD, YYYY') : date.format('MMMM DD');
       return (
         <ListGroup.Item key={key}>
           <Stack direction="horizontal" gap={3}>
-            <b className="special-date">{date.format('MMMM DD')}</b>
+            <b className="special-date">{dateLabel}</b>
             <ListGroup variant="flush" className="w-100">
               {items.map(({ id, value, type }) => (
                 <ListGroup.Item key={id} className="ps-0 pe-0">
@@ -234,7 +253,8 @@ class SpecialDates extends React.PureComponent {
   }
 
   renderItems(groupedItems) {
-    const keys = Object.keys(groupedItems).sort();
+    const sortKey = (key) => (isYearSpecificDate(key) ? key.slice(-DATE_FORMAT.length) + key : key);
+    const keys = Object.keys(groupedItems).sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
     return <ListGroup>{keys.map(this.renderItem(groupedItems))}</ListGroup>;
   }
 
@@ -347,14 +367,10 @@ class SpecialDates extends React.PureComponent {
   }
 
   renderHolidaysSection() {
-    const { t, year, month, monthCount } = this.props;
+    const { t } = this.props;
     const { countries, countriesStatus, selectedCountry, nameLanguage, deduplicate, holidaysStatus } = this.state;
 
-    const spannedYears = getSpannedYears({
-      year: Number(year),
-      month: Number(month),
-      monthCount: Number(monthCount),
-    });
+    const spannedYears = this.getSpannedCalendarYears();
     const isLoadingCountries = countriesStatus === STATUS_LOADING;
 
     return (
@@ -508,6 +524,8 @@ SpecialDates.propTypes = {
   year: PropTypes.number.isRequired,
   month: PropTypes.number.isRequired,
   monthCount: PropTypes.number.isRequired,
+  isDecadeEnabled: PropTypes.bool,
+  decadeStartYear: PropTypes.number,
   items: PropTypes.array.isRequired,
   onAdd: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,

@@ -12,7 +12,6 @@ export default defineConfig({
         main: './index.html',
         app: './create.html',
         features: './features.html',
-        faq: './faq.html',
       },
     },
   },

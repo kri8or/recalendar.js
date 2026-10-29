@@ -106,6 +106,7 @@ class ConfigurationSelector extends React.PureComponent {
 
       case TEMPLATE_MINIMALISTIC:
         configOverrides.specialDates = [];
+        configOverrides.isDecadeEnabled = false;
         configOverrides.isYearNotesEnabled = false;
         configOverrides.yearNotesItinerary = [];
         configOverrides.habits = [];

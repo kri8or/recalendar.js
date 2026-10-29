@@ -4,8 +4,7 @@
   "navigation": {
     "home": "Home",
     "configuration": "Create your calendar",
-    "features": "Features",
-    "faq": "FAQ"
+    "features": "Features"
   },
   "language": {
     "label": "Language",
@@ -190,6 +189,14 @@
     "toggle-form": {
       "enabled": "Enabled",
       "disabled": "Disabled"
+    },
+    "decade": {
+      "title": "Years overview",
+      "description": "Adds a page with an overview of 6 years - each year shown as a square with its 12 months, and every year links to its own year overview. When enabled, the calendar is generated for all 6 years, starting with January of the first year - the starting month and number of months settings are ignored. Keep in mind that a 6-year calendar takes a long time to generate and produces a large PDF.",
+      "start-year": {
+        "label": "First year",
+        "description": "The first of the 6 years that the calendar is generated for. It defaults to the calendar's first year."
+      }
     },
     "year": {
       "notes": {

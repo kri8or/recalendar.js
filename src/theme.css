@@ -45,14 +45,14 @@
   --rc-surface: rgb(var(--rc-surface-rgb));
   --rc-ink-rgb: 43, 42, 38;
   --rc-ink: rgb(var(--rc-ink-rgb));
-  --rc-accent-rgb: 193, 95, 60;
+  --rc-accent-rgb: 84, 90, 159;
   --rc-accent: rgb(var(--rc-accent-rgb));
   --rc-secondary-bg-rgb: 236, 225, 205;
   --rc-secondary-bg: rgb(var(--rc-secondary-bg-rgb));
 
   --rc-ink-soft: #6a6459;
   --rc-border: #e9dfcc;
-  --rc-accent-hover: #a64e2f;
+  --rc-accent-hover: #474b85;
   --rc-secondary-bg-hover: #e0d3ba;
   --rc-secondary-border: #ddcfb4;
 

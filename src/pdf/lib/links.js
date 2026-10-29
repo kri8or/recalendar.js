@@ -96,8 +96,12 @@ export function weekRetrospectiveLink(date, config) {
   return 'week-retrospective-' + getWeekId(date);
 }
 
-export function yearOverviewLink() {
-  return 'year-overview';
+export function decadeLink() {
+  return 'decade';
+}
+
+export function yearOverviewLink(date) {
+  return 'year-overview-' + date.format('YYYY');
 }
 
 export function yearNotesLink(date) {

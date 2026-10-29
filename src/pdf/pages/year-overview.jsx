@@ -2,12 +2,13 @@ import { Link, Page, StyleSheet, Text, View } from '@react-pdf/renderer';
 import dayjs from 'dayjs/esm';
 import PropTypes from 'prop-types';
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 
 import { getPageSizeInPoints } from '~/lib/device-utils';
 import { getHorizontalSidebarOffset } from '~/lib/sidebar-utils';
 import MiniCalendar, { HIGHLIGHT_NONE, MINI_CALENDAR_WIDTH } from '~/pdf/components/mini-calendar';
 import PdfConfig from '~/pdf/config';
-import { yearNotesLink, yearOverviewLink } from '~/pdf/lib/links';
+import { decadeLink, yearNotesLink, yearOverviewLink } from '~/pdf/lib/links';
 import { sidebarPadding } from '~/pdf/styles';
 
 const PAGE_VERTICAL_MARGIN = 5;
@@ -51,6 +52,13 @@ class YearOverviewPage extends React.Component {
       },
       separator: {
         padding: '0 6',
+      },
+      decadeLink: {
+        fontSize: 10,
+        color: '#888',
+        textAlign: 'center',
+        textDecoration: 'none',
+        marginBottom: 4,
       },
       calendarsRow: {
         flexDirection: 'row',
@@ -125,10 +133,15 @@ class YearOverviewPage extends React.Component {
   }
 
   render() {
-    const { config } = this.props;
+    const { config, startDate, t } = this.props;
     return (
       <Page size={getPageSizeInPoints(config)} style={this.styles.page}>
-        <View id={yearOverviewLink()}>{this.renderTitle()}</View>
+        <View id={yearOverviewLink(startDate)}>{this.renderTitle()}</View>
+        {config.isDecadeEnabled && (
+          <Link src={'#' + decadeLink()} style={this.styles.decadeLink}>
+            {t('page.decade.link')}
+          </Link>
+        )}
         {this.renderCalendars()}
       </Page>
     );
@@ -139,6 +152,7 @@ YearOverviewPage.propTypes = {
   config: PropTypes.instanceOf(PdfConfig).isRequired,
   endDate: PropTypes.instanceOf(dayjs).isRequired,
   startDate: PropTypes.instanceOf(dayjs).isRequired,
+  t: PropTypes.func.isRequired,
 };
 
-export default YearOverviewPage;
+export default withTranslation('pdf')(YearOverviewPage);

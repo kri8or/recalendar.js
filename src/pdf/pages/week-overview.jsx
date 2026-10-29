@@ -6,7 +6,7 @@ import { withTranslation } from 'react-i18next';
 
 import { getWeekNumber } from '~/lib/date';
 import { getPageSizeInPoints } from '~/lib/device-utils';
-import { findByDate, HOLIDAY_DAY_TYPE, DATE_FORMAT as SPECIAL_DATES_DATE_FORMAT } from '~/lib/special-dates-utils';
+import { findByDay, HOLIDAY_DAY_TYPE } from '~/lib/special-dates-utils';
 import Header from '~/pdf/components/header';
 import MiniCalendar, { HIGHLIGHT_WEEK } from '~/pdf/components/mini-calendar';
 import PdfConfig from '~/pdf/config';
@@ -91,8 +91,7 @@ class WeekOverviewPage extends React.Component {
   renderDay(day) {
     const { config } = this.props;
     const { isEnabled } = config.dayItineraries[day.weekday()];
-    const specialDateKey = day.format(SPECIAL_DATES_DATE_FORMAT);
-    const specialItems = config.specialDates.filter(findByDate(specialDateKey));
+    const specialItems = config.specialDates.filter(findByDay(day));
     const dayContent = (
       <View style={{ flexDirection: 'column' }}>
         <View style={this.styles.dayDate}>

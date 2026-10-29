@@ -37,7 +37,7 @@ class YearNotesPage extends React.Component {
       <>
         <Page id={yearNotesLink(date)} size={getPageSizeInPoints(config)}>
           <View style={this.styles.page}>
-            <Link src={'#' + yearOverviewLink()} style={this.styles.year}>
+            <Link src={'#' + yearOverviewLink(date)} style={this.styles.year}>
               {date.format('YYYY')}
             </Link>
             <View style={this.styles.content}>

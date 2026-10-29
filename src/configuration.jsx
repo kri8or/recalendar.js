@@ -32,6 +32,7 @@ import { addItem, cloneItems, moveItem, removeItem, updateItem } from '~/lib/lis
 import { createPdfGenerator } from '~/lib/pdf-generator';
 import { isHorizontalSidebar, SIDEBAR_LEFT, SIDEBAR_RIGHT } from '~/lib/sidebar-utils';
 import PdfConfig, { hydrateFromObject } from '~/pdf/config';
+import { getCalendarMonthCount } from '~/pdf/utils';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '~/theme.css';
@@ -377,10 +378,30 @@ class Configuration extends React.PureComponent {
             year={this.state.year}
             month={this.state.month}
             monthCount={this.state.monthCount}
+            isDecadeEnabled={this.state.isDecadeEnabled}
+            decadeStartYear={this.state.decadeStartYear}
             items={this.state.specialDates}
             onAdd={this.handleSpecialDateAdd}
             onRemove={this.handleListRemove}
           />
+          <ToggleSection
+            id="isDecadeEnabled"
+            title={t('configuration.decade.title')}
+            description={t('configuration.decade.description')}
+            toggledOn={this.state.isDecadeEnabled}
+            onToggle={this.handleToggle}
+            defaultActiveKey="decadeSettings"
+          >
+            <Form.Group controlId="decadeStartYear">
+              <Form.Label>{t('configuration.decade.start-year.label')}</Form.Label>
+              <Form.Control
+                type="number"
+                value={this.state.decadeStartYear || this.state.year}
+                onChange={this.handleFieldChange}
+              />
+              <Form.Text className="text-muted">{t('configuration.decade.start-year.description')}</Form.Text>
+            </Form.Group>
+          </ToggleSection>
           <ToggleSection
             id="isYearNotesEnabled"
             title={t('configuration.year.notes.title')}
@@ -481,7 +502,7 @@ class Configuration extends React.PureComponent {
           <Col xs={12} lg={6} className="d-lg-flex flex-lg-column py-3">
             <PreviewColumn
               blobUrl={this.state.blobUrl}
-              expectedTime={this.state.lastFullTime || this.state.monthCount * this.state.lastPreviewTime}
+              expectedTime={this.state.lastFullTime || getCalendarMonthCount(this.state) * this.state.lastPreviewTime}
               isGeneratingPdf={this.state.isGeneratingPdf}
               isGeneratingPreview={this.state.isGeneratingPreview}
               onDownload={this.handleDownload}

@@ -17,6 +17,9 @@
     "week": {
       "title": "Week"
     },
+    "decade": {
+      "link": "Years overview"
+    },
     "retrospective": {
       "title": "Retrospective for week"
     },

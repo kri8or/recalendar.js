@@ -9,7 +9,7 @@ import Stack from 'react-bootstrap/Stack';
 import { withTranslation } from 'react-i18next';
 
 import { getFullySupportedLocales, getPartiallySupportedLocales } from '~/config/i18n';
-import { CONFIGURATOR_PATH, FAQ_PATH, FEATURES_PATH, HOME_PATH } from '~/lib/paths';
+import { CONFIGURATOR_PATH, FEATURES_PATH, HOME_PATH } from '~/lib/paths';
 
 class Navigation extends React.Component {
   state = {
@@ -54,7 +54,7 @@ class Navigation extends React.Component {
     return (
       <Navbar bg="body-tertiary" expand="md">
         <Container fluid>
-          <Navbar.Brand href={HOME_PATH}>ReCalendar</Navbar.Brand>
+          <Navbar.Brand href={HOME_PATH}>Recalendar6</Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="me-auto" variant="pills">
@@ -68,9 +68,6 @@ class Navigation extends React.Component {
               </Nav.Item>
               <Nav.Item>
                 <Nav.Link href={FEATURES_PATH}>{t('navigation.features')}</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link href={FAQ_PATH}>{t('navigation.faq')}</Nav.Link>
               </Nav.Item>
             </Nav>
             <Stack direction="horizontal">

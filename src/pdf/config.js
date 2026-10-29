@@ -28,6 +28,8 @@ const CONFIG_FIELDS = [
   'isLeftHanded',
   'sidebarPosition',
   'sidebarOffset',
+  'isDecadeEnabled',
+  'decadeStartYear',
   'isYearNotesEnabled',
   'yearNotesItinerary',
   'isMonthOverviewEnabled',
@@ -71,6 +73,8 @@ class PdfConfig {
     this.sidebarOffset = 0;
     this.monthCount = 12;
     this.fontFamily = LATO;
+    this.isDecadeEnabled = false;
+    this.decadeStartYear = null;
     this.isYearNotesEnabled = true;
     this.yearNotesItinerary = [
       {

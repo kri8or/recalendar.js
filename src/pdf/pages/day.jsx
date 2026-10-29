@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import { getPageSizeInPoints } from '~/lib/device-utils';
-import { findByDate, DATE_FORMAT as SPECIAL_DATES_DATE_FORMAT } from '~/lib/special-dates-utils';
+import { findByDay } from '~/lib/special-dates-utils';
 import Header from '~/pdf/components/header';
 import Itinerary from '~/pdf/components/itinerary';
 import MiniCalendar from '~/pdf/components/mini-calendar';
@@ -32,8 +32,7 @@ class DayPage extends React.Component {
     }
     const itemsByPage = splitItemsByPages(items);
 
-    const specialDateKey = this.props.date.format(SPECIAL_DATES_DATE_FORMAT);
-    const specialItems = this.props.config.specialDates.filter(findByDate(specialDateKey));
+    const specialItems = this.props.config.specialDates.filter(findByDay(this.props.date));
     return (
       <>
         <Page id={dayPageLink(date, config)} size={getPageSizeInPoints(config)}>

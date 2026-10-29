@@ -5,7 +5,7 @@ import React from 'react';
 import { withTranslation } from 'react-i18next';
 
 import { getWeekdays, getWeekendDays, getWeekNumber } from '~/lib/date';
-import { findByDate, isEvent, isHoliday, DATE_FORMAT as SPECIAL_DATES_DATE_FORMAT } from '~/lib/special-dates-utils';
+import { findByDay, isEvent, isHoliday } from '~/lib/special-dates-utils';
 import PdfConfig from '~/pdf/config';
 import {
   dayPageLink,
@@ -14,7 +14,7 @@ import {
   weekRetrospectiveLink,
   yearOverviewLink,
 } from '~/pdf/lib/links';
-import { isInCalendarRange, isRenderedMonth } from '~/pdf/utils';
+import { isInCalendarRange, isRenderedMonth, isYearInCalendarRange } from '~/pdf/utils';
 
 export const MINI_CALENDAR_WIDTH = 145;
 
@@ -138,15 +138,22 @@ class MiniCalendar extends React.Component {
     const { monthName, pushLeft, pushRight, header } = this.styles;
     const { config, date } = this.props;
 
+    const yearLabel = date.format('YYYY');
+    const yearInCalendar = isYearInCalendarRange(date, config);
+
     return (
       <View style={header}>
         {this.renderMonthArrow(date.subtract(1, 'month'), '<', pushLeft)}
         <Link src={'#' + monthOverviewLink(date, config)} style={monthName}>
           {date.format('MMM')}
         </Link>
-        <Link src={'#' + yearOverviewLink()} style={monthName}>
-          {date.format('YYYY')}
-        </Link>
+        {yearInCalendar ? (
+          <Link src={'#' + yearOverviewLink(date)} style={monthName}>
+            {yearLabel}
+          </Link>
+        ) : (
+          <Text style={monthName}>{yearLabel}</Text>
+        )}
         {this.renderMonthArrow(date.add(1, 'month'), '>', pushRight)}
       </View>
     );
@@ -220,8 +227,7 @@ class MiniCalendar extends React.Component {
         dayStyles.push(this.styles.noPageDay);
       }
 
-      const specialDateKey = currentDay.format(SPECIAL_DATES_DATE_FORMAT);
-      const specialDatesToday = config.specialDates.filter(findByDate(specialDateKey));
+      const specialDatesToday = config.specialDates.filter(findByDay(currentDay));
       if (specialDatesToday.length > 0) {
         if (specialDatesToday.some(isEvent)) {
           dayStyles.push(this.styles.eventDay);
